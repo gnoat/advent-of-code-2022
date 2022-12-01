@@ -52,7 +52,7 @@ func main() {
     }
     sort.Ints(elf_cal_counter)
 
-    // Next we calculate the sum using *another* for loop because Go sucks
+    // Next we calculate the sum using *another* for-loop because Go sucks
     top_three_cal_total := 0
     for _, cals := range elf_cal_counter[len(elf_cal_counter)-3:] {
         top_three_cal_total = top_three_cal_total + cals
