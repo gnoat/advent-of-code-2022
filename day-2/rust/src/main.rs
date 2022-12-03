@@ -18,7 +18,6 @@ fn main() {
     println!("The total score with the new strategy is {}", new_strat_total_score)
 }
 
-#[derive(Clone)]
 enum Hand {
     Rock,
     Paper,
