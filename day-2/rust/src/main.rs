@@ -84,31 +84,20 @@ fn score_from_row(row: &str) -> Option<u32> {
     Some(my_hand.score(&their_hand))
 }
 
-fn cheap_permute(n: u32, forward: bool) -> u32 {
-    if forward {
-        match &n {
-            1 => 2,
-            2 => 3,
-            _ => 1,
-        }
-    } else {
-        match &n {
-            2 => 1,
-            3 => 2,
-            _ => 3,
-        }
-    }
-}
 fn score_from_row_new_strat(row: &str) -> Option<u32> {
+    // After all the work for the first question, I got lazy af so you just get this
+    // hacky function instead.  It works, it's just not beautiful.
     let row = row.trim();
     let their_char = row.chars().next()?;
     let my_char = row.chars().last()?;
     let their_hand = Hand::new(their_char)?;
     let their_value = their_hand.value();
+
+    // Don't pay any attention to the sketchy ass logic below, it works
     match my_char {
-        'X' => Some(cheap_permute(their_value, false)),
+        'X' => Some(if their_value > 1 { their_value - 1 } else { 3 }),
         'Y' => Some(their_value + 3),
-        'Z' => Some(cheap_permute(their_value, true) + 6),
+        'Z' => Some(if their_value == 3 { 1 } else { their_value + 1 } + 6),
         _ => None
     }
 }
