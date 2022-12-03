@@ -42,9 +42,7 @@ fn main() {
             v[0][..]
                 .chars()
                 .into_iter()
-                .filter(|c| v[1][..].contains(*c))
-                .into_iter()
-                .filter(|c| v[2][..].contains(*c))
+                .filter(|c| v[1].contains(*c) && v[2].contains(*c))
                 .next()
                 .unwrap_or('0')
         })
