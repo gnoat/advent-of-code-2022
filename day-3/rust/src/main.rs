@@ -12,7 +12,7 @@ fn main() {
     // Basically just iterate over the characters of each entry, split in two,
     // check for a common character, the use priority HashMap to evaluate each string
     // and sum together.
-    let total_priority = &DATA
+    let total_priority: &usize = &DATA
         .split("\n")
         .map(|row| {
             row[..row.len() / 2]
@@ -23,7 +23,7 @@ fn main() {
                 .unwrap_or('0')
         })
         .map(|c| priority.get(&c).unwrap_or(&0))
-        .sum::<usize>();
+        .sum();
 
     println!(
         "The total priority of the mixed items is {}.",
