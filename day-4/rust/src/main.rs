@@ -1,4 +1,3 @@
-#![feature(str_split_as_str)]
 use std::include_str;
 
 fn main() {
@@ -36,6 +35,5 @@ fn main() {
             (v[1][0]..v[1][1]+1).contains(&v[0][0]) ||
             (v[1][0]..v[1][1]+1).contains(&v[0][1]))
         .count();
-
     println!("There are {} pairs that are partially overlapping.", partially_overlapping_count);
 }
