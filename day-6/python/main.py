@@ -8,12 +8,12 @@ and once as a one-liner."""
 def main(s: str, window_size: int = 4) -> Optional[int]:
     for idx in range(window_size, len(s)):
         window = s[idx - window_size: idx]
-        if len(window) == len(set(window)):
+        if window_size == len(set(window)):
             return idx
 
 
 # One liner
-main_one_line = lambda s, n: next(idx for idx in range(n, len(s)) if len(s[idx - n: idx]) == len(set(s[idx - n: idx])))
+main_one_line = lambda s, n: next(idx for idx in range(n, len(s)) if n == len(set(s[idx - n: idx])))
 
 
 if __name__ == "__main__":
