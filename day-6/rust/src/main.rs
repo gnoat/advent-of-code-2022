@@ -14,10 +14,9 @@ fn main() {
 }
 
 fn find_signal_index(data: &str, window_size: usize) -> usize {
-    data.chars()
-        .collect::<Vec<char>>()
+    data.as_bytes()
         .windows(window_size)
-        .position(|s| HashSet::<&char>::from_iter(s.into_iter()).len() == window_size)
+        .position(|s| HashSet::<&u8>::from_iter(s.into_iter()).len() == window_size)
         .unwrap_or(0) + window_size // must add window_size at the end because iterating over windows is
 }
 
