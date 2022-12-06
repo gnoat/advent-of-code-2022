@@ -1,0 +1,1 @@
+print(f"The answer index for unique sequences of length 4 and 14 are {' and '.join(map(lambda v: next(str(idx) for idx in range(v[1], len(v[0])) if len(v[0][idx - v[1]: idx]) == len(set(v[0][idx - v[1]: idx]))), [(open('data.txt', 'r').read(), 4), (open('data.txt', 'r').read(), 14)]))}")
