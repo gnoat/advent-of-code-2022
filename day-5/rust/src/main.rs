@@ -136,8 +136,8 @@ fn solution_part_two(data: &'static str) -> String {
 }
 
 #[test]
-fn examples() {
-    static DATA: &str = r#"    [D]    
+fn example_tests() {
+    static TEST_DATA: &str = r#"    [D]    
 [N] [C]    
 [Z] [M] [P]
  1   2   3 
@@ -147,6 +147,6 @@ move 3 from 1 to 3
 move 2 from 2 to 1
 move 1 from 1 to 2"#;
 
-    assert_eq!(solution_part_one(DATA), "CMZ".to_string());
-    assert_eq!(solution_part_two(DATA), "MCD".to_string());
+    assert_eq!(solution_part_one(TEST_DATA), "CMZ".to_string());
+    assert_eq!(solution_part_two(TEST_DATA), "MCD".to_string());
 }
