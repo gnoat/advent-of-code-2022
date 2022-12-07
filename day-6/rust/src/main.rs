@@ -17,7 +17,7 @@ fn find_signal_index(data: &str, window_size: usize) -> usize {
     data.as_bytes()
         .windows(window_size)
         .position(|s| HashSet::<&u8>::from_iter(s.into_iter()).len() == window_size)
-        .unwrap_or(0) + window_size // must add window_size at the end because iterating over windows is
+        .unwrap_or(0) + window_size
 }
 
 // Adding problem examples as unit tests
