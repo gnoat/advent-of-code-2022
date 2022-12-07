@@ -45,7 +45,7 @@ fn combined_top_three(data: &str) -> i32 {
 
 #[test]
 fn example_tests() {
-    static TEST_ONE_DATA: &str =
+    static TEST_DATA: &str =
 r#"1000
 2000
 3000
@@ -61,6 +61,6 @@ r#"1000
 
 10000"#;
 
-    assert_eq!(cal_counter(&TEST_ONE_DATA), 24000);
-    assert_eq!(combined_top_three(TEST_ONE_DATA), 45000);
+    assert_eq!(cal_counter(&TEST_DATA), 24000);
+    assert_eq!(combined_top_three(TEST_DATA), 45000);
 }

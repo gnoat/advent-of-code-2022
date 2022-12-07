@@ -21,3 +21,21 @@ fn main() {
 
 }
 
+#[test]
+fn example_tests() {
+    static TEST_DATA:&str =
+r#"A Y
+B X
+C Z
+"#;
+
+    // Test conceptual solution
+    let (first_ans_concept, second_ans_concept) = main_conceptual_solution(TEST_DATA);
+    assert_eq!(first_ans_concept, 15);
+    assert_eq!(second_ans_concept, 12);
+
+    // Test fast solution
+    let (first_ans_fast, second_ans_fast) = main_speed_solution(TEST_DATA);
+    assert_eq!(first_ans_fast, 15);
+    assert_eq!(second_ans_fast, 12);
+}

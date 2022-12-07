@@ -1,4 +1,4 @@
-pub fn main_conceptual_solution(data: &str) {
+pub fn main_conceptual_solution(data: &str)  -> (u32, u32) {
     let first_strat_total_score: &u32 = &data
         .split("\n")
         .map(|row| score_from_row(row).unwrap_or(0))
@@ -11,7 +11,8 @@ pub fn main_conceptual_solution(data: &str) {
         .map(|row| score_from_row_new_strat(row).unwrap_or(0))
         .sum();
 
-    println!("    - The total score with the new strategy is {}", new_strat_total_score)
+    println!("    - The total score with the new strategy is {}", new_strat_total_score);
+    (*first_strat_total_score, *new_strat_total_score)
 }
 
 enum Hand {

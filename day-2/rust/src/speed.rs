@@ -1,4 +1,4 @@
-pub fn main_speed_solution(data: &str) {
+pub fn main_speed_solution(data: &str) -> (u32, u32) {
     let first_strat_total = &data
         .split("\n")
         .map(|row| fast_score_old_strat(row.trim()))
@@ -10,6 +10,8 @@ pub fn main_speed_solution(data: &str) {
         .map(|row| fast_score_new_strat(row.trim()))
         .sum::<u32>();
     println!("    - The total score with the new strategy is {}", second_strat_total);
+
+    (*first_strat_total, *second_strat_total)
 }
 
 fn fast_score_old_strat(row: &str) -> u32 {
