@@ -40,7 +40,6 @@ fn smallest_to_delete_part_two(data: &str) -> u64 {
 #[derive(Debug)]
 struct FileSystem {
     cd: String,
-    forwards: HashMap<String, HashSet<String>>,
     backwards: HashMap<String, String>,
     contents: HashMap<String, u64>,
 }
@@ -49,7 +48,6 @@ impl FileSystem {
     fn new() -> FileSystem {
         FileSystem {
             cd: "/".to_string(),
-            forwards: HashMap::<String, HashSet<String>>::new(),
             backwards: HashMap::<String, String>::new(),
             contents: HashMap::<String, u64>::new(),
         }
@@ -68,7 +66,6 @@ impl FileSystem {
         if cmd.contains("cd /") {
             FileSystem {
                 cd: "/".to_string(),
-                forwards: take(&mut self.forwards),
                 backwards: take(&mut self.backwards),
                 contents: take(&mut self.contents),
             }
@@ -76,7 +73,6 @@ impl FileSystem {
             let new_dir = self.backwards.get(&self.cd).unwrap_or(&self.cd).clone();
             FileSystem {
                 cd: new_dir,
-                forwards: take(&mut self.forwards),
                 backwards: take(&mut self.backwards),
                 contents: take(&mut self.contents),
             }
@@ -87,29 +83,23 @@ impl FileSystem {
                 .or_insert(self.cd.clone());
             FileSystem {
                 cd: format!("{}{}/", self.cd, new_dir),
-                forwards: take(&mut self.forwards),
                 backwards: take(&mut self.backwards),
                 contents: take(&mut self.contents),
             }
         } else if cmd.contains("ls") {
             let current_contents = Self::measure_block(follow_block);
-            self.forwards
-                .entry(self.cd.clone())
-                .or_insert(Self::find_sub_dirs(&follow_block));
             self.contents
                 .entry(self.cd.clone())
                 .or_insert(current_contents);
             self.backpropagate_content(&self.cd.clone());
             FileSystem {
                 cd: take(&mut self.cd),
-                forwards: take(&mut self.forwards),
                 backwards: take(&mut self.backwards),
                 contents: take(&mut self.contents),
             }
         } else {
             FileSystem {
                 cd: take(&mut self.cd),
-                forwards: take(&mut self.forwards),
                 backwards: take(&mut self.backwards),
                 contents: take(&mut self.contents),
             }
