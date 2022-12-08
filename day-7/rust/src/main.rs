@@ -1,8 +1,4 @@
-use std::{
-    collections::HashMap,
-    include_str,
-    mem::take,
-};
+use std::{collections::HashMap, include_str, mem::take};
 
 fn main() {
     static DATA: &str = include_str!("data.txt");
@@ -40,7 +36,6 @@ fn smallest_to_delete_part_two(data: &str) -> u64 {
 #[derive(Debug)]
 struct FileSystem {
     cd: String,
-    backwards: HashMap<String, String>,
     contents: HashMap<String, u64>,
 }
 
@@ -48,7 +43,6 @@ impl FileSystem {
     fn new() -> FileSystem {
         FileSystem {
             cd: "/".to_string(),
-            backwards: HashMap::<String, String>::new(),
             contents: HashMap::<String, u64>::new(),
         }
     }
@@ -66,24 +60,17 @@ impl FileSystem {
         if cmd.contains("cd /") {
             FileSystem {
                 cd: "/".to_string(),
-                backwards: take(&mut self.backwards),
                 contents: take(&mut self.contents),
             }
         } else if cmd.contains("cd ..") {
-            let new_dir = self.backwards.get(&self.cd).unwrap_or(&self.cd).clone();
             FileSystem {
-                cd: new_dir,
-                backwards: take(&mut self.backwards),
+                cd: self.cd.rsplit_once("/").unwrap_or(("/", "")).0.to_string(),
                 contents: take(&mut self.contents),
             }
         } else if cmd.contains("cd") {
             let new_dir = cmd.split(" ").last().unwrap_or("/").to_string();
-            self.backwards
-                .entry(format!("{}{}/", self.cd, new_dir))
-                .or_insert(self.cd.clone());
             FileSystem {
                 cd: format!("{}{}/", self.cd, new_dir),
-                backwards: take(&mut self.backwards),
                 contents: take(&mut self.contents),
             }
         } else if cmd.contains("ls") {
@@ -91,20 +78,19 @@ impl FileSystem {
             self.contents
                 .entry(self.cd.clone())
                 .or_insert(current_contents);
-            self.backpropagate_content(&self.cd.clone());
+            self.backpropagate_content(self.cd.clone());
             FileSystem {
                 cd: take(&mut self.cd),
-                backwards: take(&mut self.backwards),
                 contents: take(&mut self.contents),
             }
         } else {
             FileSystem {
                 cd: take(&mut self.cd),
-                backwards: take(&mut self.backwards),
                 contents: take(&mut self.contents),
             }
         }
     }
+
     fn measure_block(follow_block: &str) -> u64 {
         follow_block
             .lines()
@@ -113,12 +99,23 @@ impl FileSystem {
             .sum()
     }
 
-    fn backpropagate_content(&mut self, dir: &String) {
-        let mut parent_dir = dir;
-        let backprop_value = self.contents.get(parent_dir).unwrap().clone();
-        while parent_dir != &"/".to_string() {
-            parent_dir = self.backwards.get(parent_dir).unwrap();
-            let current_contents = self.contents.get_mut(parent_dir).unwrap().clone();
+    fn backpropagate_content(&mut self, dir: String) {
+        let mut parent_dir = dir.clone();
+        let backprop_value = self.contents.get(&parent_dir).unwrap().clone();
+        while parent_dir != "/".to_string() {
+            let unparsed_parent_dir = parent_dir
+                .rsplit_once("/")
+                .unwrap_or(("/", ""))
+                .0
+                .rsplit_once("/")
+                .unwrap_or(("/", ""))
+                .0;
+            parent_dir = if unparsed_parent_dir != "/" {
+                format!("{}/", unparsed_parent_dir)
+            } else {
+                "/".to_string()
+            };
+            let current_contents = self.contents.get_mut(&parent_dir).unwrap().clone();
             let new_contents = current_contents + backprop_value;
             self.contents.insert(parent_dir.to_string(), new_contents);
         }
