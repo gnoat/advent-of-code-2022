@@ -1,5 +1,5 @@
 use std::{
-    collections::{HashMap, HashSet},
+    collections::HashMap,
     include_str,
     mem::take,
 };
@@ -111,15 +111,6 @@ impl FileSystem {
             .filter(|row| !row.contains("dir ") && !row.is_empty())
             .map(|row| row.split(" ").next().unwrap().parse::<u64>().unwrap_or(0))
             .sum()
-    }
-
-    fn find_sub_dirs(follow_block: &str) -> HashSet<String> {
-        follow_block
-            .lines()
-            .filter(|row| row.contains("dir "))
-            .filter_map(|row| row.split(" ").last())
-            .map(|row| row.to_string())
-            .collect::<HashSet<String>>()
     }
 
     fn backpropagate_content(&mut self, dir: &String) {
