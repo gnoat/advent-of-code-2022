@@ -100,18 +100,19 @@ impl FileSystem {
     }
 
     fn backpropagate_content(&mut self, dir: String) {
+        // This is ugly but works.  If I get time, I'll refactor with a more functional approach.
         let mut parent_dir = dir.clone();
         let backprop_value = self.contents.get(&parent_dir).unwrap().clone();
         while parent_dir != "/".to_string() {
-            let unparsed_parent_dir = parent_dir
+            let uncorrected_parent_dir = parent_dir
                 .rsplit_once("/")
                 .unwrap_or(("/", ""))
                 .0
                 .rsplit_once("/")
                 .unwrap_or(("/", ""))
                 .0;
-            parent_dir = if unparsed_parent_dir != "/" {
-                format!("{}/", unparsed_parent_dir)
+            parent_dir = if uncorrected_parent_dir != "/" {
+                format!("{}/", uncorrected_parent_dir)
             } else {
                 "/".to_string()
             };
