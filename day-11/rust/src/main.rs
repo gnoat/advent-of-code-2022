@@ -1,50 +1,48 @@
-use std::{
-    include_str,
-    collections::HashMap,
-};
 use sscanf::sscanf;
+use std::{collections::HashMap, include_str};
 
 fn main() {
     static DATA: &str = include_str!("data.txt");
 
-    println!("The level of monkey business after 20 rounds is {}.\n", part_one(DATA));
-    println!("The level of monkey business after 1000 rounds is {}.\n", part_two(DATA));
+    println!(
+        "The level of monkey business after 20 rounds is {}.\n",
+        part_one(DATA)
+    );
+    println!(
+        "The level of monkey business after 1000 rounds is {}.\n",
+        part_two(DATA)
+    );
 }
 
-fn part_one(data: &str) -> u128 {
+fn part_one(data: &str) -> u64 {
     let mut troop = Troop::new(3);
     troop.load(data);
     troop.monkey_around_too_much(20);
-    let mut vals: Vec<u128> = troop.held_count
-        .values()
-        .map(|n| *n as u128)
-        .collect();
+    let mut vals: Vec<u64> = troop.held_count.values().map(|n| *n as u64).collect();
     vals.sort();
     vals.reverse();
     vals[0] * vals[1]
 }
 
-fn part_two(data: &str) -> u128 {
+fn part_two(data: &str) -> u64 {
     let mut troop = Troop::new(1);
     troop.load(data);
-    troop.monkey_around_too_much(1000);
-    let mut vals: Vec<&u128> = troop.held_count
-        .values()
-        .collect();
+    troop.monkey_around_too_much(10000);
+    let mut vals: Vec<&u64> = troop.held_count.values().collect();
     vals.sort();
     vals.reverse();
     vals[0] * vals[1]
 }
 
 enum Operation {
-    Mult(u128),
-    Add(u128),
+    Mult(u64),
+    Add(u64),
     Square,
     Double,
 }
 
 impl Operation {
-    fn eval(&self, val: &u128) -> u128 {
+    fn eval(&self, val: &u64) -> u64 {
         match self {
             Operation::Mult(n) => n * val,
             Operation::Add(n) => n + val,
@@ -55,34 +53,58 @@ impl Operation {
 }
 
 struct Monkey {
-    monkey: u128,
-    held_items: Vec<u128>,
+    monkey: usize,
+    held_items: Vec<u64>,
     operation: Operation,
-    test: u128,
-    true_toss: u128,
-    false_toss: u128,
+    test: u64,
+    true_toss: usize,
+    false_toss: usize,
 }
 
 impl Monkey {
     fn from(block: &str) -> Self {
         let mut lines = block.lines();
-        let monkey_n = sscanf!(lines.next().unwrap().trim(), "Monkey {u128}:").unwrap();
-        let starting: Vec<u128> = lines.next().unwrap().split(":").last().unwrap().trim().split(", ").map(|n| n.parse::<u128>().unwrap()).collect::<Vec<u128>>().into_iter().rev().collect();
-        let op_tupe = sscanf!(lines.next().unwrap().trim(), "Operation: new = old {char} {str}").unwrap();
+        let monkey_n = sscanf!(lines.next().unwrap().trim(), "Monkey {usize}:").unwrap();
+        let starting: Vec<u64> = lines
+            .next()
+            .unwrap()
+            .split(":")
+            .last()
+            .unwrap()
+            .trim()
+            .split(", ")
+            .map(|n| n.parse::<u64>().unwrap())
+            .collect::<Vec<u64>>()
+            .into_iter()
+            .rev()
+            .collect();
+        let op_tupe = sscanf!(
+            lines.next().unwrap().trim(),
+            "Operation: new = old {char} {str}"
+        )
+        .unwrap();
         let op = match op_tupe.0 {
             '*' => match op_tupe.1 {
                 "old" => Operation::Square,
-                _ => Operation::Mult(op_tupe.1.parse::<u128>().unwrap()),
-            }
+                _ => Operation::Mult(op_tupe.1.parse::<u64>().unwrap()),
+            },
             '+' => match op_tupe.1 {
                 "old" => Operation::Double,
-                _ => Operation::Add(op_tupe.1.parse::<u128>().unwrap()),
-                },
-            _ => panic!("Operation not found")
+                _ => Operation::Add(op_tupe.1.parse::<u64>().unwrap()),
+            },
+            _ => panic!("Operation not found"),
         };
-        let test_n = sscanf!(lines.next().unwrap().trim(), "Test: divisible by {u128}").unwrap();
-        let true_toss_n = sscanf!(lines.next().unwrap().trim(), "If true: throw to monkey {u128}").unwrap();
-        let false_toss_n = sscanf!(lines.next().unwrap().trim(), "If false: throw to monkey {u128}").unwrap();
+        let test_n = sscanf!(lines.next().unwrap().trim(), "Test: divisible by {u64}").unwrap();
+        let true_toss_n = sscanf!(
+            lines.next().unwrap().trim(),
+            "If true: throw to monkey {usize}"
+        )
+        .unwrap();
+        let false_toss_n = sscanf!(
+            lines.next().unwrap().trim(),
+            "If false: throw to monkey {usize}"
+        )
+        .unwrap();
         Monkey {
             monkey: monkey_n,
             held_items: starting,
@@ -93,15 +115,22 @@ impl Monkey {
         }
     }
 }
+
 struct Troop {
-    monkeys: HashMap<u128, Monkey>,
-    held_count: HashMap<u128, u128>,
-    div: u128
+    monkeys: HashMap<usize, Monkey>,
+    held_count: HashMap<usize, u64>,
+    div: u64,
+    gcd: u64,
 }
 
 impl Troop {
-    fn new(d: u128) -> Self {
-        Troop { monkeys: HashMap::new(), held_count: HashMap::new(), div: d }
+    fn new(d: u64) -> Self {
+        Troop {
+            monkeys: HashMap::new(),
+            held_count: HashMap::new(),
+            div: d,
+            gcd: 1,
+        }
     }
 
     fn load(&mut self, data: &str) {
@@ -111,41 +140,50 @@ impl Troop {
             self.monkeys.insert(monkey.monkey.clone(), monkey);
         }
 
-        if self.div == 1 {
-            self.div = self.monkeys.values().map(|m| m.test).product();
-            println!("new div {}", self.div);
-        }
+        self.gcd = self.monkeys.values().map(|m| m.test).product();
     }
 
     fn monkey_around_once(&mut self) {
-        for idx in 0..self.monkeys.len() {
-            let monkey_idx = idx as u128;
+        for monkey_idx in 0..self.monkeys.len() {
             while self.monkeys[&monkey_idx].held_items.len() > 0 {
-                let initial_item_worry = self.monkeys.get_mut(&monkey_idx).unwrap().held_items.pop().unwrap();
-                let item_worry_uncorrected = self.monkeys[&monkey_idx].operation.eval(&initial_item_worry);
-                let item_worry = match self.div {
-                    1 => item_worry_uncorrected % self.div,
-                    _ => item_worry_uncorrected / self.div,
-                };
-                println!("monkey {} initial {} worry {}", monkey_idx, initial_item_worry, item_worry);
-                self.held_count.insert(monkey_idx.clone(), self.held_count[&monkey_idx] + 1);
+                let initial_item_worry = self
+                    .monkeys
+                    .get_mut(&monkey_idx)
+                    .unwrap()
+                    .held_items
+                    .pop()
+                    .unwrap();
+                let mut item_worry = self.monkeys[&monkey_idx]
+                    .operation
+                    .eval(&initial_item_worry)
+                    / self.div;
+                item_worry %= self.gcd;
+                self.held_count
+                    .insert(monkey_idx.clone(), self.held_count[&monkey_idx] + 1);
                 if item_worry % self.monkeys[&monkey_idx].test == 0 {
-                    self.monkeys.get_mut(&self.monkeys[&monkey_idx].true_toss.clone()).unwrap().held_items.insert(0, item_worry);
+                    self.monkeys
+                        .get_mut(&self.monkeys[&monkey_idx].true_toss.clone())
+                        .unwrap()
+                        .held_items
+                        .insert(0, item_worry);
                 } else {
-                    self.monkeys.get_mut(&self.monkeys[&monkey_idx].false_toss.clone()).unwrap().held_items.insert(0, item_worry);
+                    self.monkeys
+                        .get_mut(&self.monkeys[&monkey_idx].false_toss.clone())
+                        .unwrap()
+                        .held_items
+                        .insert(0, item_worry);
                 };
             }
         }
     }
 
-    fn monkey_around_too_much(&mut self, iterations: u128) {
-        (0..iterations)
-            .for_each(|_| self.monkey_around_once());
+    fn monkey_around_too_much(&mut self, iterations: u64) {
+        (0..iterations).for_each(|_| self.monkey_around_once());
     }
 }
 
 #[test]
-fn test_examples () {
+fn test_examples() {
     static TEST_DATA: &str = r#"Monkey 0:
   Starting items: 79, 98
   Operation: new = old * 19
@@ -174,8 +212,6 @@ Monkey 3:
     If true: throw to monkey 0
     If false: throw to monkey 1"#;
 
-    println!("TEST ONE");
     assert_eq!(part_one(TEST_DATA), 10605);
-    println!("TEST TWO");
     assert_eq!(part_two(TEST_DATA), 2713310158);
 }
