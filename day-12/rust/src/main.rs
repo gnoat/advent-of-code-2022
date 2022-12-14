@@ -25,9 +25,10 @@ fn main() {
 
     let part_one_solution = part_one(DATA, char_order.clone(), draw).unwrap_or(0);
     println!(
-        "[part one] It takes {:?} moves to get to the top from the start.\n\n",
+        "[part one] It takes {:?} moves to get to the top from the start.",
         part_one_solution
     );
+    if draw { println!("\n\n") };
     let part_two_solution = part_two(DATA, char_order, draw).unwrap_or(0);
     println!(
         "[part two] It takes {:?} moves to get to the top from any 'a' position.",

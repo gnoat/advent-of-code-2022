@@ -22,7 +22,7 @@ for img in l.split("\n\n"):
         print(img)
         sleep(.02)
     else:
-        print("\n[info]", img.strip())
+        print("\n", img.strip())
         print(" - Press enter to proceed - ")
         input()
         clear()

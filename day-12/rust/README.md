@@ -8,4 +8,4 @@ from the root Day 12 Rust solution directory.  This is a simply Python script ru
 
 The Rust solution for this day is a modified form of Dijkstra's algorithm applied forward from the start for the first part and applied backwards from the end for the second.
 
-Obvi to run this script you need to have some form of **Python 3** and **Rust** installed on your system.
+Obvi to run this script you need to have some form of **Python 3** and **Rust** installed on your system.  If you don't have both installed on your system, I've recorded a GIF of the output you can view.  Simply open up `solution-animation.gif` and enjoy.
