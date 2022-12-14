@@ -45,10 +45,8 @@ fn part_one(data: &str, char_order: HashMap<char, i32>, draw: bool) -> Option<us
         height,
         char_order,
         27,
-        Direction::Ascending,
-        draw
-    );
-    walker.propagate()
+        Direction::Ascending);
+    walker.propagate(draw)
 }
 
 fn part_two(data: &str, char_order: HashMap<char, i32>, draw: bool) -> Option<usize> {
@@ -60,10 +58,8 @@ fn part_two(data: &str, char_order: HashMap<char, i32>, draw: bool) -> Option<us
         height,
         char_order,
         1,
-        Direction::Descending,
-        draw
-    );
-    walker.propagate()
+        Direction::Descending);
+    walker.propagate(draw)
 }
 
 fn read_string_to_vector(
@@ -116,7 +112,6 @@ struct Walk {
     char_order: HashMap<char, i32>,
     end: i32,
     direction: Direction,
-    draw: bool,
 }
 
 impl Walk {
@@ -128,7 +123,6 @@ impl Walk {
         char_order: HashMap<char, i32>,
         end: i32,
         direction: Direction,
-        draw: bool,
     ) -> Self {
         Walk {
             visited: HashSet::from([start]),
@@ -140,11 +134,10 @@ impl Walk {
             char_order: char_order,
             end: end,
             direction: direction,
-            draw: draw,
         }
     }
 
-    fn next(&mut self) -> Option<bool> {
+    fn next(&mut self, draw: bool) -> Option<bool> {
         let mut new_line = HashSet::new();
         self.current
             .clone()
@@ -169,10 +162,10 @@ impl Walk {
             };
             self.current = new_line;
             self.cycle = self.cycle + 1;
-            if self.draw { self.draw_progress() };
+            if draw { self.draw_progress() };
             Some(last_visited == self.end)
         } else {
-            if self.draw { self.draw_progress() };
+            if draw { self.draw_progress() };
             None
         }
     }
@@ -202,10 +195,10 @@ impl Walk {
             .0
     }
 
-    fn propagate(&mut self) -> Option<usize> {
+    fn propagate(&mut self, draw: bool) -> Option<usize> {
         let mut contains_end = false;
         while !contains_end {
-            let dce = self.next();
+            let dce = self.next(draw);
             match dce {
                 Some(x) => {
                     contains_end = x;
