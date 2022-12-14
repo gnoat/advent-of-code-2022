@@ -6,4 +6,4 @@ python3 view.py
 ```
 from the root Day 9 Rust solution directory.  This is a simply Python script runs the Rust program, captures the output, and visualizes the path taken.
 
-The Rust solution for this day is a modified form of Dijkstra's algorithm.
+The Rust solution for this day is a modified form of Dijkstra's algorithm applied forward from the start for the first part and applied backwards from the end for the second.
