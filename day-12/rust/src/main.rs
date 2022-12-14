@@ -145,15 +145,13 @@ impl Walk {
                     .clone()
                     .into_iter()
                     .map(|p| self.d(&p))
-                    .max()
-                    .unwrap(),
+                    .max()?,
                 Direction::Descending => self
                     .visited
                     .clone()
                     .into_iter()
                     .map(|p| self.d(&p))
-                    .min()
-                    .unwrap(),
+                    .min()?,
             };
             self.current = new_line;
             self.cycle = self.cycle + 1;
