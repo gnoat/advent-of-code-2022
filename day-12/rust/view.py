@@ -9,7 +9,7 @@ def clear():
         system("clear")
 
 # Run the Rust solution and capture the stdout
-system("cargo run > motion.txt")
+system("cargo run -- draw > motion.txt")
 
 # Read output from Rust solution
 with open("motion.txt", "r") as f:

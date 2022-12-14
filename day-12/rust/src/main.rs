@@ -2,6 +2,7 @@ use itertools::iproduct;
 use std::{
     collections::{HashMap, HashSet},
     include_str,
+    env::args
 };
 
 fn main() {
@@ -9,6 +10,10 @@ fn main() {
     // you should run `python3 view.py` from the root Day 9 Rust solution directory.  This is a 
     // simply Python script runs the Rust program, captures the output, and visualizes the path
     // taken.
+    let draw = match args().nth(1) {
+        Some(_) => true,
+        None => false,
+    };
     static DATA: &str = include_str!("data.txt");
     static VALS: &str = "SabcdefghijklmnopqrstuvwxyzE";
     let char_order: HashMap<char, i32> = VALS
@@ -17,17 +22,20 @@ fn main() {
         .map(|(x, y)| (y, x as i32))
         .collect();
 
+
+    let part_one_solution = part_one(DATA, char_order.clone(), draw).unwrap_or(0);
     println!(
-        "It takes {:?} moves to get to the top from the start.\n\n",
-        part_one(DATA, char_order.clone()).unwrap_or(0)
+        "[part one] It takes {:?} moves to get to the top from the start.\n\n",
+        part_one_solution
     );
+    let part_two_solution = part_two(DATA, char_order, draw).unwrap_or(0);
     println!(
-        "It takes {:?} moves to get to the top from any 'a' position.",
-        part_two(DATA, char_order).unwrap_or(0)
+        "[part two] It takes {:?} moves to get to the top from any 'a' position.",
+        part_two_solution
     );
 }
 
-fn part_one(data: &str, char_order: HashMap<char, i32>) -> Option<usize> {
+fn part_one(data: &str, char_order: HashMap<char, i32>, draw: bool) -> Option<usize> {
     let (width, height, start, _, matrix) = read_string_to_vector(data, &char_order);
     let mut walker = Walk::new(
         matrix,
@@ -37,11 +45,12 @@ fn part_one(data: &str, char_order: HashMap<char, i32>) -> Option<usize> {
         char_order,
         27,
         Direction::Ascending,
+        draw
     );
     walker.propagate()
 }
 
-fn part_two(data: &str, char_order: HashMap<char, i32>) -> Option<usize> {
+fn part_two(data: &str, char_order: HashMap<char, i32>, draw: bool) -> Option<usize> {
     let (width, height, _, end, matrix) = read_string_to_vector(data, &char_order);
     let mut walker = Walk::new(
         matrix,
@@ -51,6 +60,7 @@ fn part_two(data: &str, char_order: HashMap<char, i32>) -> Option<usize> {
         char_order,
         1,
         Direction::Descending,
+        draw
     );
     walker.propagate()
 }
@@ -105,6 +115,7 @@ struct Walk {
     char_order: HashMap<char, i32>,
     end: i32,
     direction: Direction,
+    draw: bool,
 }
 
 impl Walk {
@@ -116,6 +127,7 @@ impl Walk {
         char_order: HashMap<char, i32>,
         end: i32,
         direction: Direction,
+        draw: bool,
     ) -> Self {
         Walk {
             visited: HashSet::from([start]),
@@ -127,6 +139,7 @@ impl Walk {
             char_order: char_order,
             end: end,
             direction: direction,
+            draw: draw,
         }
     }
 
@@ -155,10 +168,10 @@ impl Walk {
             };
             self.current = new_line;
             self.cycle = self.cycle + 1;
-            self.draw_progress();
+            if self.draw { self.draw_progress() };
             Some(last_visited == self.end)
         } else {
-            self.draw_progress();
+            if self.draw { self.draw_progress() };
             None
         }
     }
@@ -237,6 +250,6 @@ abdefghi
         .map(|(x, y)| (y, x as i32))
         .collect();
 
-    assert_eq!(part_one(TEST_DATA, char_order.clone()), Some(31));
-    assert_eq!(part_two(TEST_DATA, char_order), Some(29));
+    assert_eq!(part_one(TEST_DATA, char_order.clone(), false), Some(31));
+    assert_eq!(part_two(TEST_DATA, char_order, false), Some(29));
 }
