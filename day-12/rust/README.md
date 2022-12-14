@@ -1,4 +1,4 @@
-# Best Way to View this solution
+# Best Way to View this Solution
 
 You can read the solutions by simply running this Rust crate, but to get the full effect you should run 
 ```python
