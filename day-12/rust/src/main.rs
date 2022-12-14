@@ -170,7 +170,7 @@ impl Walk {
                     if self.visited.contains(&[h, w]) {
                         '.'
                     } else {
-                        self.inv_d(&[h, w]).to_ascii_uppercase()
+                        self.inv_d(&[h, w])
                     }
                 })
                 .collect();
