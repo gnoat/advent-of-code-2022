@@ -20,7 +20,7 @@ for img in l.split("\n\n"):
     if "It takes" not in img:
         clear()
         print(img)
-        sleep(.025)
+        sleep(.02)
     else:
         print("\n[info]", img.strip())
         print(" - Press enter to proceed - ")
