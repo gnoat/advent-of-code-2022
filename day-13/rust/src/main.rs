@@ -28,18 +28,11 @@ fn part_two(data: &str) -> usize {
         .map(|s| Seq::from(s))
         .collect();
     seq_vec.sort();
-    let first_idx = seq_vec
-        .iter()
-        .position(|seq| seq == &Seq::from("[[2]]"))
-        .unwrap()
-        + 1;
-    let second_idx = seq_vec
-        .iter()
-        .position(|seq| seq == &Seq::from("[[6]]"))
-        .unwrap()
-        + 1;
-
-    first_idx * second_idx
+    seq_vec.iter()
+        .enumerate()
+        .filter(|(_, seq)| [&Seq::from("[[2]]"), &Seq::from("[[6]]")].contains(seq))
+        .map(|(idx, _)| idx + 1)
+        .product()
 }
 
 #[derive(Debug, Clone, Eq)]
