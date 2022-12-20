@@ -65,14 +65,14 @@ impl Seq {
             (a, b) if a == b => self.compare(other),
             (_, ']') => Ordering::Greater,
             (']', _) => Ordering::Less,
-            ('[', x) => {
+            ('[', b) => {
                 other.stack.push(']');
-                other.stack.push(x);
+                other.stack.push(b);
                 self.compare(other)
             }
-            (x, '[') => {
+            (a, '[') => {
                 self.stack.push(']');
-                self.stack.push(x);
+                self.stack.push(a);
                 self.compare(other)
             }
             (_, _) => curr_self.cmp(&curr_other),
