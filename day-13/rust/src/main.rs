@@ -56,9 +56,10 @@ impl Seq {
     }
 
     fn compare(&mut self, other: &mut Seq) -> Ordering {
-        let curr_self = self.stack.pop().unwrap_or('!');
-        let curr_other = other.stack.pop().unwrap_or('!');
-        match (curr_self, curr_other) {
+        match (
+            self.stack.pop().unwrap_or('!'),
+            other.stack.pop().unwrap_or('!'),
+        ) {
             ('!', '!') => Ordering::Equal,
             ('!', _) => Ordering::Less,
             (_, '!') => Ordering::Greater,
