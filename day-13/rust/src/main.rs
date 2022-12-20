@@ -75,7 +75,7 @@ impl Seq {
                 self.stack.push(a);
                 self.compare(other)
             }
-            (_, _) => curr_self.cmp(&curr_other),
+            (a, b) => a.cmp(&b),
         }
     }
 }
