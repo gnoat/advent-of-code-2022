@@ -1,12 +1,12 @@
-use std::{
-    include_str,
-    cmp::Ordering,
-};
+use std::{cmp::Ordering, include_str};
 
 fn main() {
     static DATA: &str = include_str!("data.txt");
 
-    println!("The index sum for all pairs in proper order is {:?}.", part_one(DATA));
+    println!(
+        "The index sum for all pairs in proper order is {:?}.",
+        part_one(DATA)
+    );
     println!("The divider packet index product is {:?}.", part_two(DATA));
 }
 
@@ -22,32 +22,37 @@ fn part_one(data: &str) -> usize {
 
 fn part_two(data: &str) -> usize {
     let data_extended = format!("{}\n[[2]]\n[[6]]", data.replace("\n\n", "\n"));
-
     let mut seq_vec: Vec<Seq> = data_extended
         .split("\n")
         .filter(|s| s.len() > 0)
         .map(|s| Seq::from(s))
         .collect();
-
     seq_vec.sort();
-
-    let first_idx = seq_vec.iter().position(|seq| seq == &Seq::from("[[2]]")).unwrap() + 1;
-    let second_idx = seq_vec.iter().position(|seq| seq == &Seq::from("[[6]]")).unwrap() + 1;
+    let first_idx = seq_vec
+        .iter()
+        .position(|seq| seq == &Seq::from("[[2]]"))
+        .unwrap()
+        + 1;
+    let second_idx = seq_vec
+        .iter()
+        .position(|seq| seq == &Seq::from("[[6]]"))
+        .unwrap()
+        + 1;
 
     first_idx * second_idx
 }
 
 #[derive(Debug, Clone, Eq)]
 struct Seq {
-    stack: Vec<char>
+    stack: Vec<char>,
 }
 
 impl Seq {
     fn from<T: AsRef<str>>(s: T) -> Self {
-        let prep_string = s.as_ref()
-            .replace("10", ":")
-            .replace(",", "");
-        Seq { stack: prep_string.chars().rev().collect() }
+        let prep_string = s.as_ref().replace("10", ":").replace(",", "");
+        Seq {
+            stack: prep_string.chars().rev().collect(),
+        }
     }
 
     fn compare(&mut self, other: &mut Seq) -> Ordering {
@@ -64,25 +69,22 @@ impl Seq {
                 other.stack.push(']');
                 other.stack.push(x);
                 self.compare(other)
-            },
+            }
             (x, '[') => {
                 self.stack.push(']');
                 self.stack.push(x);
                 self.compare(other)
-            },
-            (_, _) => {
-                curr_self.cmp(&curr_other)
             }
+            (_, _) => curr_self.cmp(&curr_other),
         }
     }
- }
+}
 
 impl PartialOrd for Seq {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.clone().compare(&mut other.clone()))
     }
 }
-
 
 impl Ord for Seq {
     fn cmp(&self, other: &Self) -> Ordering {
