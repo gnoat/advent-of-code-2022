@@ -1,4 +1,3 @@
-use itertools::{iproduct, Itertools};
 use sscanf::sscanf;
 use std::{
     cmp,
