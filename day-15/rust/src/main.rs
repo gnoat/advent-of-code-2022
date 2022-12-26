@@ -1,17 +1,20 @@
+use itertools::{iproduct, Itertools};
 use sscanf::sscanf;
-use itertools::{Itertools, iproduct};
 use std::{
+    cmp,
     collections::{HashMap, HashSet},
     include_str,
-    cmp,
 };
 
 fn main() {
     static DATA: &str = include_str!("data.txt");
     let net = Network::from(DATA);
 
-    println!("There are {:?} places where a beacon is not possible.", part_one(net.clone(), 2_000_000));
-    // println!("The found frequency is {:?}.", part_two(net, 4_000_000));
+    println!(
+        "There are {:?} places where a beacon is not possible.",
+        part_one(net.clone(), 2_000_000)
+    );
+    println!("The found frequency is {:?}.", part_two(net, 4_000_000));
 }
 
 fn part_one(net: Network, row: i64) -> usize {
@@ -19,45 +22,19 @@ fn part_one(net: Network, row: i64) -> usize {
 }
 
 fn part_two(net: Network, max_search: i64) -> i64 {
-    net.full_search(max_search)
-}
-
-#[derive(Debug, Clone)]
-struct Ranger {
-    ranges: HashSet<[i64; 2]>
-}
-
-impl Ranger {
-    fn new() -> Self {
-        Ranger { ranges: HashSet::new() }
-    }
-
-    fn insert(&mut self, r: &[i64; 2]) {
-        println!(">> {:?} ~ {:?}", self.ranges, r);
-        let intersect = self.ranges.clone().into_iter()
-            .find(|[min_p, max_p]| (min_p >= &r[0]) && (&r[0] <= max_p) ||
-                (max_p >= &r[1]) && (min_p <= &r[1]));
-        println!("{:?}", intersect);
-        let new_range: [i64; 2] = match intersect {
-            Some(i) => {
-                self.ranges.remove(&i);
-                if (i[0] >= r[0]) && (r[0] <= i[1]) {
-                    [i[0], cmp::max(r[1], i[1])]
-                } else if (i[1] >= r[1]) && (i[0] <= r[1]) {
-                    [cmp::min(i[0], r[0]), i[1]]
-                } else { *r }
-            },
-            None => *r
-        };
-        self.ranges.insert(new_range);
-    }
+    net.ranges
+        .into_iter()
+        .filter(|(idx, b)| (b > &0) && (&0 < idx) && (idx <= &max_search))
+        .map(|(idx, b)| b * 4_000_000 + idx)
+        .next()
+        .unwrap()
 }
 
 #[derive(Debug, Clone)]
 struct Network {
     sensors: HashMap<[i64; 2], i64>,
     width: [i64; 2],
-    ranges: HashMap<i64, bool>,
+    ranges: HashMap<i64, i64>,
 }
 
 impl Network {
@@ -70,29 +47,34 @@ impl Network {
                     "Sensor at x={i64}, y={i64}: closest beacon is at x={i64}, y={i64}"
                 )
                 .ok()
-            }).collect();
-        let sensors: HashMap<[i64; 2], i64> = raw.clone().into_iter()
-            .flat_map(|(x0, y0, x1, y1)| [([x0, y0], (x1 - x0).abs() + (y1 - y0).abs()), ([x1, y1], 0)])
+            })
+            .collect();
+        let sensors: HashMap<[i64; 2], i64> = raw
+            .clone()
+            .into_iter()
+            .flat_map(|(x0, y0, x1, y1)| {
+                [([x0, y0], (x1 - x0).abs() + (y1 - y0).abs()), ([x1, y1], 0)]
+            })
             .collect();
         let mut ranges: HashMap<i64, HashSet<[i64; 2]>> = HashMap::new();
-        for (k, v) in sensors.clone().into_iter().filter(|(_, v)| v != &0) {
-            for (i, n) in (k[1] + v..k[1] + 1).enumerate() {
-                ranges.entry(n).or_default().insert([k[0] - i as i64, k[0] + i as i64]);
+        for (k, v) in sensors.clone().into_iter() {
+            for (i, n) in (k[1]..k[1] + v + 1).enumerate() {
+                ranges
+                    .entry(n)
+                    .or_default()
+                    .insert([k[0] - (v - i as i64), k[0] + (v - i as i64)]);
             }
             for (i, n) in (k[1] - v..k[1] + 1).enumerate() {
-                ranges.entry(n).or_default().insert([k[0] - i as i64, k[0] + i as i64]);
+                ranges
+                    .entry(n)
+                    .or_default()
+                    .insert([k[0] - i as i64, k[0] + i as i64]);
             }
-        };
-        let mut debu: Vec<(i64, HashSet<[i64; 2]>)> = ranges.clone().into_iter().collect();
-        debu.sort_by_key(|(i, _)| i.clone());
-        debu.into_iter().for_each(|x| println!("{:?}", x));
-        let ranges: HashMap<i64, bool> = ranges.into_iter()
-            .map(|(i, h)| (i, Self::fuckery(h)))
+        }
+        let ranges: HashMap<i64, i64> = ranges
+            .into_iter()
+            .map(|(i, h)| (i, Self::evaluate(h)))
             .collect();
-        println!("\n{:?}", ranges);
-        let mut debu: Vec<i64> = ranges.clone().into_iter().filter(|(_, b)| *b).map(|(i, _)| i).collect();
-        debu.sort();
-        println!("\n{:?}", debu);
         let width: HashSet<i64> = sensors
             .clone()
             .into_iter()
@@ -115,24 +97,40 @@ impl Network {
 
     fn count_empty_row(&self, row: i64) -> usize {
         (self.width[0]..self.width[1] + 1)
-            .filter(|x| self.within_bounds([x, &row]) && self.sensors.get(&[x.clone(), row]).unwrap_or(&1) != &0)
+            .filter(|x| {
+                self.within_bounds([x, &row])
+                    && self.sensors.get(&[x.clone(), row]).unwrap_or(&1) != &0
+            })
             .count()
     }
-    
-    fn full_search(&self, max_search: i64) -> i64 {
-        let (x_o, y_o) = iproduct!(0..max_search + 1, 0..max_search + 1)
-            .find(|(x, y)| !self.within_bounds([x, y]))
-            .unwrap();
-        x_o * 4_000_000 + y_o
+
+    fn combine(v0: Vec<[i64; 2]>) -> Vec<[i64; 2]> {
+        let mut v = v0.clone();
+        v.sort_by_key(|[i, _]| i.clone());
+        let mut init: [i64; 2] = v[0];
+        let mut com = vec![init];
+        for idx in 1..v.len() {
+            if v[idx][0] <= init[1] + 1 {
+                init = [init[0], cmp::max(v[idx][1], init[1])];
+                com = vec![init];
+            } else {
+                let rest = v.split_off(idx);
+                com.extend(Self::combine(rest));
+                break;
+            }
+        }
+        com
     }
 
-    fn fuckery(s: HashSet<[i64; 2]>) -> bool {
-        let mut v: Vec<[i64; 2]> = s.into_iter()
-            .collect();
+    fn evaluate(h: HashSet<[i64; 2]>) -> i64 {
+        let mut v: Vec<[i64; 2]> = h.into_iter().collect();
         v.sort_by_key(|[i, _]| i.clone());
-        v.into_iter().tuple_windows::<(_, _)>()
-            .find(|(x, y)| x[1] != y[0] + 1)
-            .is_some()
+        let out = Self::combine(v);
+        if out.len() > 1 {
+            out[0][1] + 1
+        } else {
+            0
+        }
     }
 }
 
@@ -155,5 +153,5 @@ Sensor at x=20, y=1: closest beacon is at x=15, y=3"#;
     let net = Network::from(TEST_DATA);
 
     assert_eq!(part_one(net.clone(), 10), 26);
-    // assert_eq!(part_two(net, 20), 56_000_011);
+    assert_eq!(part_two(net, 20), 56_000_011);
 }
